@@ -47,7 +47,7 @@ fun RookApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) {
               currentRoute = currentRoute,
               navigateToHome = navigationActions.navigateToHome,
               navigateToInit = navigationActions.navigateToInitial,
-              closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
+              closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } },
           )
         },
         drawerState = sizeAwareDrawerState,

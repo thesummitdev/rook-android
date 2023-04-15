@@ -2,7 +2,6 @@ package dev.thesummit.rook.ui.home
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,23 +13,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
@@ -40,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,19 +57,21 @@ fun HomeTopAppBar(
         TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 ) {
   val title = stringResource(R.string.app_name)
-  CenterAlignedTopAppBar(
-      title = { Text(title) },
+  TopAppBar(
+      title = {},
       navigationIcon = {
         IconButton(onClick = openDrawer) {
           Icon(
-              // painter = painterResource(R.drawable.ic_rook_logo),
-              imageVector = Icons.Filled.Menu,
+              painter = painterResource(R.drawable.ic_rook_logo),
               contentDescription = "navigate",
               tint = MaterialTheme.colorScheme.primary,
           )
         }
       },
       actions = {
+        IconButton(onClick = { /* TODO: Open filters */}) {
+          Icon(imageVector = Icons.Filled.Label, contentDescription = "search")
+        }
         IconButton(onClick = { /* TODO: Open search */}) {
           Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
         }
@@ -176,6 +178,8 @@ fun LoadingContent(
           refreshing,
           pullRefreshState,
           Modifier.align(Alignment.TopCenter),
+          backgroundColor = MaterialTheme.colorScheme.surface,
+          contentColor = MaterialTheme.colorScheme.onSurface,
       )
     }
   }
@@ -196,7 +200,7 @@ fun LinkList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
 
-  LazyColumn(modifier = modifier) {
+  LazyColumn(modifier = modifier, contentPadding = contentPadding) {
     items(linksFeed.allLinks, { link: Link -> link.id }) { link -> LinkCard(link) }
   }
 }
@@ -207,7 +211,8 @@ fun LinkTitle(link: Link) {
       text = link.title,
       style = MaterialTheme.typography.titleMedium,
       maxLines = 3,
-      overflow = TextOverflow.Ellipsis
+      overflow = TextOverflow.Ellipsis,
+      color = MaterialTheme.colorScheme.tertiary,
   )
 }
 
@@ -216,23 +221,30 @@ fun SimpleLink(link: Link) {
   LinkTitle(link)
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkCard(link: Link) {
 
   val context = LocalContext.current
 
   ListItem(
-      Modifier.clickable {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
-        context.startActivity(intent)
+      headlineText = { LinkTitle(link) },
+      supportingText = {
+        Text(
+            text = link.url,
+            style = MaterialTheme.typography.labelSmall,
+        )
+        Text(
+            text = link.tags,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary,
+        )
       },
-      text = { LinkTitle(link) },
-      secondaryText = {
-        Text(link.url)
-        Text(link.tags)
-      },
-      singleLineSecondaryText = false,
+      modifier =
+          Modifier.clickable {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
+            context.startActivity(intent)
+          },
   )
-  Divider()
+  Divider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.tertiary)
 }
