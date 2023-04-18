@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Label
@@ -56,7 +58,6 @@ fun HomeTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? =
         TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 ) {
-  val title = stringResource(R.string.app_name)
   TopAppBar(
       title = {},
       navigationIcon = {
@@ -98,7 +99,11 @@ fun HomeLinksFeed(
       openDrawer = openDrawer,
       modifier = modifier,
   ) { hasLinksUiState, contentModifier ->
-    LinkList(linksFeed = hasLinksUiState.linksFeed, modifier = contentModifier)
+    LinkList(
+        linksFeed = hasLinksUiState.linksFeed,
+        modifier = contentModifier,
+        state = lazyListState
+    )
   }
 }
 
@@ -135,23 +140,28 @@ fun HomeScreenWithList(
             .fillMaxWidth()
 
     LoadingContent(
-        empty =
-            when (uiState) {
-              is HomeUiState.HasLinks -> false
-              is HomeUiState.NoLinks -> uiState.isLoading
-            },
+        empty = uiState.isLoading,
         emptyContent = { FullScreenLoading() },
         refreshing = uiState.isLoading,
         onRefreshLinks = onRefreshLinks,
         content = {
           when (uiState) {
             is HomeUiState.HasLinks -> hasLinksContent(uiState, contentModifier)
-            is HomeUiState.NoLinks -> {
-              Text("Links Empty")
-            }
+            is HomeUiState.NoLinks -> noLinksContent(uiState, contentModifier)
           }
         }
     )
+  }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun noLinksContent(uiState: HomeUiState.NoLinks, modifier: Modifier) {
+
+  val scrollState = rememberScrollState()
+
+  Box(modifier.fillMaxSize().wrapContentSize(Alignment.Center).verticalScroll(scrollState)) {
+    Text(text = stringResource(uiState.errorMessages.first().messageId))
   }
 }
 
@@ -170,7 +180,7 @@ fun LoadingContent(
   if (empty) {
     emptyContent()
   } else {
-    Box(Modifier.pullRefresh(pullRefreshState)) {
+    Box(Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
       if (!refreshing) {
         content()
       }
@@ -198,9 +208,9 @@ fun LinkList(
     linksFeed: LinksFeed,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    state: LazyListState = rememberLazyListState(),
 ) {
-
-  LazyColumn(modifier = modifier, contentPadding = contentPadding) {
+  LazyColumn(modifier = modifier, contentPadding = contentPadding, state = state) {
     items(linksFeed.allLinks, { link: Link -> link.id }) { link -> LinkCard(link) }
   }
 }

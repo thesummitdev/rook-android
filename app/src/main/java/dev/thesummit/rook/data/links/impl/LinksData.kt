@@ -101,7 +101,7 @@ val link11 =
         /*modified=*/ 1673693377,
     )
 
-val links: List<Link> =
+val fakeLinks: List<Link> =
     listOf(
         link1,
         link2,

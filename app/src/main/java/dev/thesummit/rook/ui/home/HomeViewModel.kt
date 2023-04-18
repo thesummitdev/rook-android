@@ -1,12 +1,12 @@
 package dev.thesummit.rook.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.thesummit.rook.R
 import dev.thesummit.rook.data.Result
 import dev.thesummit.rook.data.links.LinksRepository
-import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinksFeed
 import dev.thesummit.rook.utils.ErrorMessage
 import java.util.UUID
@@ -76,12 +76,14 @@ private data class HomeViewModelState(
    */
   fun toUiState(): HomeUiState =
       if (linksFeed == null) {
+        Log.i("Rook", "no links")
         HomeUiState.NoLinks(
             isLoading = isLoading,
             errorMessages = errorMessages,
             searchInput = searchInput
         )
       } else {
+        Log.i("Rook", "has links")
         HomeUiState.HasLinks(
             linksFeed = linksFeed,
             isLoading = isLoading,
@@ -105,21 +107,24 @@ class HomeViewModel(private val linksRepository: LinksRepository) : ViewModel() 
   }
 
   fun refreshLinks() {
+    Log.i("Rook", "refreshing links")
     viewModelState.update { it.copy(isLoading = true) }
 
     viewModelScope.launch {
-      val result = linksRepository.getLinks()
-      viewModelState.update {
-        when (result) {
-          is Result.Success -> it.copy(linksFeed = LinksFeed(result.data), isLoading = false)
-          is Result.Error -> {
-            val errorMessages =
-                it.errorMessages +
-                    ErrorMessage(
-                        id = UUID.randomUUID().mostSignificantBits,
-                        messageId = R.string.load_error
-                    )
-            it.copy(errorMessages = errorMessages, isLoading = false)
+      linksRepository.getLinks().collect { result ->
+        viewModelState.update {
+          when (result) {
+            is Result.Success -> it.copy(linksFeed = LinksFeed(result.data), isLoading = false)
+            is Result.Error -> {
+              Log.i("Rook", "found result.error")
+              val errorMessages =
+                  it.errorMessages +
+                      ErrorMessage(
+                          id = UUID.randomUUID().mostSignificantBits,
+                          messageId = R.string.load_error
+                      )
+              it.copy(linksFeed = null, errorMessages = errorMessages, isLoading = false)
+            }
           }
         }
       }
