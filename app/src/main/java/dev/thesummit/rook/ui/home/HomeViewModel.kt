@@ -1,15 +1,20 @@
 package dev.thesummit.rook.ui.home
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import dev.thesummit.rook.R
 import dev.thesummit.rook.data.Result
 import dev.thesummit.rook.data.links.LinksRepository
 import dev.thesummit.rook.model.LinksFeed
 import dev.thesummit.rook.utils.ErrorMessage
+import dev.thesummit.rook.workers.SyncWorker
 import java.util.UUID
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -76,14 +81,12 @@ private data class HomeViewModelState(
    */
   fun toUiState(): HomeUiState =
       if (linksFeed == null) {
-        Log.i("Rook", "no links")
         HomeUiState.NoLinks(
             isLoading = isLoading,
             errorMessages = errorMessages,
             searchInput = searchInput
         )
       } else {
-        Log.i("Rook", "has links")
         HomeUiState.HasLinks(
             linksFeed = linksFeed,
             isLoading = isLoading,
@@ -93,8 +96,12 @@ private data class HomeViewModelState(
       }
 }
 
-class HomeViewModel(private val linksRepository: LinksRepository) : ViewModel() {
+class HomeViewModel(
+    private val applicationContext: Context,
+    private val linksRepository: LinksRepository,
+) : ViewModel() {
   private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
+  private val workManager = WorkManager.getInstance(applicationContext)
 
   // UI state exposed to the UI
   val uiState =
@@ -104,12 +111,6 @@ class HomeViewModel(private val linksRepository: LinksRepository) : ViewModel() 
 
   init {
     refreshLinks()
-  }
-
-  fun refreshLinks() {
-    Log.i("Rook", "refreshing links")
-    viewModelState.update { it.copy(isLoading = true) }
-
     viewModelScope.launch {
       linksRepository.getLinks().collect { result ->
         viewModelState.update {
@@ -131,8 +132,19 @@ class HomeViewModel(private val linksRepository: LinksRepository) : ViewModel() 
     }
   }
 
+  fun refreshLinks() {
+    Log.i("Rook", "refreshing links")
+    viewModelState.update { it.copy(isLoading = true) }
+    workManager.enqueue(OneTimeWorkRequest.from(SyncWorker::class.java))
+    viewModelScope.launch {
+      delay(800) // TODO: subscribe to workmanager and hide this when the work request is done.
+      viewModelState.update { it.copy(isLoading = false) }
+    }
+  }
+
   companion object {
     fun provideFactory(
+        applicationContext: Context,
         linksRepository: LinksRepository,
     ): ViewModelProvider.Factory =
         // Handled by compose compiler
@@ -140,7 +152,7 @@ class HomeViewModel(private val linksRepository: LinksRepository) : ViewModel() 
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return HomeViewModel(linksRepository) as T
+            return HomeViewModel(applicationContext, linksRepository) as T
           }
         }
   }

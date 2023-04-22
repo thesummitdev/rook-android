@@ -6,12 +6,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinkDao
+import dev.thesummit.rook.model.Setting
+import dev.thesummit.rook.model.SettingDao
 import kotlin.synchronized
 
-@Database(entities = [Link::class], version = 1, exportSchema = false)
+@Database(entities = [Link::class, Setting::class], version = 1, exportSchema = false)
 abstract class RookDatabase : RoomDatabase() {
 
-  abstract fun linkDao(): LinkDao
+  abstract fun links(): LinkDao
+  abstract fun settings(): SettingDao
 
   companion object {
     @Volatile private var Instance: RookDatabase? = null

@@ -9,22 +9,25 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 
+
+@Serializable
 @Entity(tableName = "links")
 data class Link(
     @PrimaryKey(autoGenerate = false) val id: Int,
     val title: String,
     val tags: String,
     val url: String,
-    val modified: Int
+    val modified: Long,
 )
 
 @Dao
 interface LinkDao {
 
-  @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insert(link: Link)
+  @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(link: Link)
   @Update suspend fun update(link: Link)
   @Delete suspend fun delete(link: Link)
 
-  @Query("SELECT * from links ORDER BY id ASC") fun getAllLinks(): Flow<List<Link>>
+  @Query("SELECT * from links ORDER BY id DESC") fun getAllLinks(): Flow<List<Link>>
 }

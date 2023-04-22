@@ -6,15 +6,28 @@ import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinkDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import org.chromium.net.CronetEngine
 
-class RookLinksRepository(private val linkDao: LinkDao) : LinksRepository {
+private const val TAG = "Rook"
+
+class RookLinksRepository(private val linkDao: LinkDao, private val cronetEngine: CronetEngine) :
+    LinksRepository {
 
   override suspend fun getLinks(): Flow<Result<List<Link>>> {
 
     return withContext(Dispatchers.IO) {
-      linkDao.getAllLinks().map { links -> Result.Success(links) }
+      try {
+        linkDao.getAllLinks().map { links -> Result.Success(links) }
+      } catch (exception: Exception) {
+        flow { Result.Error(exception) }
+      }
     }
+  }
+
+  override suspend fun addLink(link: Link) {
+    linkDao.insert(link)
   }
 }

@@ -4,12 +4,10 @@ import android.util.Log
 import dev.thesummit.rook.data.Result
 import dev.thesummit.rook.data.links.LinksRepository
 import dev.thesummit.rook.model.Link
-import dev.thesummit.rook.model.LinkDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class FakeLinksRepository() : LinksRepository {
@@ -21,13 +19,12 @@ class FakeLinksRepository() : LinksRepository {
         Log.i("Rook", "failing randomly")
         flow { emit(Result.Error(IllegalStateException("randomly failed"))) }
       } else {
-        flow {
-          emit(Result.Success(fakeLinks))
-        }
+        flow { emit(Result.Success(fakeLinks)) }
       }
     }
   }
 
+  override suspend fun addLink(link: Link) {}
   private var requestCount = 0
 
   private fun shouldRandomlyFail(): Boolean = ++requestCount % 5 == 0

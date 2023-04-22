@@ -43,7 +43,13 @@ fun RookNavGraph(
 
     composable(RookDestinations.HOME_ROUTE) {
       val homeViewModel: HomeViewModel =
-          viewModel(factory = HomeViewModel.provideFactory(appContainer.linksRepository))
+          viewModel(
+              factory =
+                  HomeViewModel.provideFactory(
+                      appContainer.applicationContext,
+                      appContainer.linksRepository,
+                  )
+          )
       HomeRoute(
           homeViewModel = homeViewModel,
           isExpandedScreen = isExpandedScreen,

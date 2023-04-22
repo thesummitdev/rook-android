@@ -7,5 +7,6 @@ import kotlinx.coroutines.flow.Flow
 /** Interface to the Links data layer. */
 interface LinksRepository {
 
+  suspend fun addLink(link:Link)
   suspend fun getLinks(): Flow<Result<List<Link>>>
 }
