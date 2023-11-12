@@ -9,4 +9,5 @@ interface LinksRepository {
 
   suspend fun addLink(link:Link)
   suspend fun getLinks(): Flow<Result<List<Link>>>
+  suspend fun dropAllLinks(): Unit
 }

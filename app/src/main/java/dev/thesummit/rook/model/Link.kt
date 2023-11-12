@@ -30,4 +30,5 @@ interface LinkDao {
   @Delete suspend fun delete(link: Link)
 
   @Query("SELECT * from links ORDER BY id DESC") fun getAllLinks(): Flow<List<Link>>
+  @Query("DELETE FROM links") fun dropAllLinks()
 }

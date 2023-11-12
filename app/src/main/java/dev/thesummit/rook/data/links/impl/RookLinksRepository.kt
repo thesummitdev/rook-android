@@ -30,4 +30,8 @@ class RookLinksRepository(private val linkDao: LinkDao, private val cronetEngine
   override suspend fun addLink(link: Link) {
     linkDao.insert(link)
   }
+
+  override suspend fun dropAllLinks() {
+    linkDao.dropAllLinks();
+  }
 }

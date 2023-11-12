@@ -14,6 +14,7 @@ import dev.thesummit.rook.model.LinksFeed
 import dev.thesummit.rook.utils.ErrorMessage
 import dev.thesummit.rook.workers.SyncWorker
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -134,6 +135,12 @@ class HomeViewModel(
 
   fun refreshLinks() {
     Log.i("Rook", "refreshing links")
+
+    viewModelScope.launch(Dispatchers.IO) {
+      // Until we diff the current database, just drop everything and resync.
+      linksRepository.dropAllLinks()
+    }
+
     viewModelState.update { it.copy(isLoading = true) }
     workManager.enqueue(OneTimeWorkRequest.from(SyncWorker::class.java))
     viewModelScope.launch {
