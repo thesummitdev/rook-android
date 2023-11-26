@@ -11,6 +11,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -23,42 +24,44 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.thesummit.rook.data.AppContainer
 import dev.thesummit.rook.ui.components.AppNavRail
-import dev.thesummit.rook.ui.theme.RookTheme
+import dev.thesummit.rook.ui.navigation.RookDestinations
+import dev.thesummit.rook.ui.navigation.RookNavGraph
+import dev.thesummit.rook.ui.navigation.RookNavigationActions
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RookApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) {
-  RookTheme {
-    val navController = rememberNavController()
-    val navigationActions = remember(navController) { RookNavigationActions(navController) }
+  val navController = rememberNavController()
+  val navigationActions = remember(navController) { RookNavigationActions(navController) }
 
-    val coroutineScope = rememberCoroutineScope()
+  val coroutineScope = rememberCoroutineScope()
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: RookDestinations.INITIAL_ROUTE
+  val navBackStackEntry by navController.currentBackStackEntryAsState()
+  val currentRoute = navBackStackEntry?.destination?.route ?: RookDestinations.INITIAL_ROUTE
 
-    val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
-    val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
+  val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
+  val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
 
-    ModalNavigationDrawer(
-        drawerContent = {
-          AppDrawer(
-              currentRoute = currentRoute,
-              navigateToHome = navigationActions.navigateToHome,
-              navigateToInit = navigationActions.navigateToInitial,
-              closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } },
-          )
-        },
-        drawerState = sizeAwareDrawerState,
-        gesturesEnabled = !isExpandedScreen
-    ) {
+  ModalNavigationDrawer(
+      drawerContent = {
+        AppDrawer(
+            currentRoute = currentRoute,
+            navigateToHome = navigationActions.navigateToHome,
+            navigateToSettings = navigationActions.navigateToSettings,
+            closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } },
+        )
+      },
+      drawerState = sizeAwareDrawerState,
+      gesturesEnabled = !isExpandedScreen
+  ) {
+    Surface {
       Row {
         if (isExpandedScreen) {
           AppNavRail(
               currentRoute = currentRoute,
               navigateToHome = navigationActions.navigateToHome,
-              navigateToInit = navigationActions.navigateToInitial,
+              navigateToSettings = navigationActions.navigateToSettings,
           )
         }
         RookNavGraph(

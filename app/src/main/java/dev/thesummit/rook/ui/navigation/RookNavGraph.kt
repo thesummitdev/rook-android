@@ -1,4 +1,4 @@
-package dev.thesummit.rook.ui
+package dev.thesummit.rook.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,6 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import dev.thesummit.rook.data.AppContainer
 import dev.thesummit.rook.ui.home.HomeRoute
 import dev.thesummit.rook.ui.home.HomeViewModel
+import dev.thesummit.rook.ui.settings.SettingsRoute
+import dev.thesummit.rook.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +54,22 @@ fun RookNavGraph(
           )
       HomeRoute(
           homeViewModel = homeViewModel,
+          isExpandedScreen = isExpandedScreen,
+          openDrawer = openDrawer
+      )
+    }
+
+    composable(RookDestinations.SETTINGS_ROUTE) {
+      val settingsViewModel: SettingsViewModel =
+          viewModel(
+              factory =
+                  SettingsViewModel.provideFactory(
+                      appContainer.applicationContext,
+                      appContainer.settingsRepository
+                  )
+          )
+      SettingsRoute(
+          viewModel = settingsViewModel,
           isExpandedScreen = isExpandedScreen,
           openDrawer = openDrawer
       )

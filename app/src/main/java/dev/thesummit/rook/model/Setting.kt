@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 enum class SettingKey(val key: String) {
   API_KEY("apiKey"),
@@ -25,5 +26,8 @@ interface SettingDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(setting: Setting)
   @Update suspend fun update(setting: Setting)
   @Delete suspend fun delete(setting: Setting)
-  @Query("SELECT * from settings WHERE key=:key") suspend fun get(key: String): Setting?
+  @Query("SELECT * from settings WHERE key=:key") fun get(key: String): Flow<Setting?>
+  @Query("SELECT * from settings WHERE key=:key") suspend fun getOnce(key: String): Setting?
+  @Query("DELETE from settings WHERE key in (:keys)") suspend fun dropSettings(keys:List<String>)
+  @Query("DELETE from settings") suspend fun dropAllSettings()
 }

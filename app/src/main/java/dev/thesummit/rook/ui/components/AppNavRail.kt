@@ -16,7 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import dev.thesummit.rook.R
-import dev.thesummit.rook.ui.RookDestinations
+import dev.thesummit.rook.ui.navigation.RookDestinations
 import android.util.Log
 
 
@@ -24,7 +24,7 @@ import android.util.Log
 fun AppNavRail(
     currentRoute: String,
     navigateToHome: () -> Unit,
-    navigateToInit: () -> Unit,
+    navigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavigationRail(
@@ -47,10 +47,10 @@ fun AppNavRail(
             alwaysShowLabel = false
         )
         NavigationRailItem(
-            selected = currentRoute == RookDestinations.INITIAL_ROUTE,
-            onClick = navigateToInit,
-            icon = { Icon(Icons.Filled.ListAlt, stringResource(R.string.home_title)) },
-            label = { Text(stringResource(R.string.home_title)) },
+            selected = currentRoute == RookDestinations.SETTINGS_ROUTE,
+            onClick = navigateToSettings,
+            icon = { Icon(Icons.Filled.ListAlt, stringResource(R.string.settings_title)) },
+            label = { Text(stringResource(R.string.settings_title)) },
             alwaysShowLabel = false
         )
         Spacer(Modifier.weight(1f))

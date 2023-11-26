@@ -1,4 +1,4 @@
-package dev.thesummit.rook.ui
+package dev.thesummit.rook.ui.navigation
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController

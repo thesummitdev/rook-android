@@ -7,6 +7,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.view.WindowCompat
 import dev.thesummit.rook.RookApplication
+import dev.thesummit.rook.ui.theme.RookTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -17,8 +18,10 @@ class MainActivity : ComponentActivity() {
 
     val appContainer = (application as RookApplication).container
     setContent {
-      val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-      RookApp(appContainer, widthSizeClass)
+      RookTheme{
+        val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
+        RookApp(appContainer, widthSizeClass)
+      }
     }
   }
 }

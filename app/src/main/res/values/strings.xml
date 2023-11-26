@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Rook</string>
     <string name="home_title">Home</string>
+    <string name="settings_title">Settings</string>
     <string name="load_error">Unable to load links</string>
+    <string name="label_server_host">Rook server address</string>
+    <string name="label_username">Username</string>
+    <string name="label_password">Password</string>
+    <string name="label_sign_in_button">Sign in to Rook</string>
 </resources>

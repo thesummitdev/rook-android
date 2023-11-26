@@ -3,17 +3,17 @@ package dev.thesummit.rook.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Nightfox
-val NightfoxBackground = Color(0xFF192330)
-val NightfoxOnBackground = Color(0xFFCDCECF)
-val NightfoxPrimary = Color(0xFFD671B2)
-val NightfoxOnPrimary = Color(0xFFAEAFB0)
-val NightfoxSurface = Color(0xFF212E3F)
+val NightfoxBackground = Color(0xFF192330) // #192330
+val NightfoxOnBackground = Color(0xFFCDCECF) // #CDCECF
+val NightfoxPrimary = Color(0xFFD671B2) // #D671B2
+val NightfoxOnPrimary = Color(0xFF212E3F) // #AEAFB0
+val NightfoxSurface = Color(0xFF212E3F) // #212E3F
 val NightfoxOnSurface = NightfoxOnPrimary
-val NightfoxSecondary = Color(0xFFD671B2)
+val NightfoxSecondary = Color(0xFFD671B2) // #D671B2
 val NightfoxOnSecondary = NightfoxOnPrimary
-val NightfoxTertiary = Color(0xFF8DBDFF)
+val NightfoxTertiary = Color(0xFF8DBDFF) // #8dBDFF
 val NightfoxOnTertiary = NightfoxOnPrimary
-val NightfoxSurfaceVariant = NightfoxOnSurface
+val NightfoxSurfaceVariant = Color(0xFF29394F)
 
 // Rook Light
 val LightBackground = Color(0xFFEFF8FF)
@@ -27,4 +27,3 @@ val LightOnSecondary = LightOnPrimary
 val LightTertiary = Color(0xFF0C4C82)
 val LightOnTertiary = LightOnPrimary
 val LightSurfaceVariant = LightOnSurface
-

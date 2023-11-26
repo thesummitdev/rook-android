@@ -23,13 +23,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.thesummit.rook.R
+import dev.thesummit.rook.ui.navigation.RookDestinations
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDrawer(
     currentRoute: String,
     navigateToHome: () -> Unit,
-    navigateToInit: () -> Unit,
+    navigateToSettings: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -44,21 +45,21 @@ fun AppDrawer(
                 )
     )
     NavigationDrawerItem(
-        label = { Text("Init") },
-        icon = { Icon(Icons.Filled.Settings, null) },
-        selected = currentRoute == RookDestinations.INITIAL_ROUTE,
-        onClick = {
-          navigateToInit()
-          closeDrawer()
-        },
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-    )
-    NavigationDrawerItem(
         label = { Text("Home") },
         icon = { Icon(Icons.Filled.Home, null) },
         selected = currentRoute == RookDestinations.HOME_ROUTE,
         onClick = {
           navigateToHome()
+          closeDrawer()
+        },
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+    )
+    NavigationDrawerItem(
+        label = { Text("Settings") },
+        icon = { Icon(Icons.Filled.Settings, null) },
+        selected = currentRoute == RookDestinations.SETTINGS_ROUTE,
+        onClick = {
+          navigateToSettings()
           closeDrawer()
         },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
