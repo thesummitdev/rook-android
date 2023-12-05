@@ -27,6 +27,7 @@ enum class WorkerAction {
   CREATE_API_KEY
 }
 
+/** A worker that logs into the Rook API and creates a persistent API token. */
 class LoginWorker(private val ctx: Context, params: WorkerParameters) :
     CoroutineWorker(ctx, params) {
 
@@ -50,6 +51,7 @@ class LoginWorker(private val ctx: Context, params: WorkerParameters) :
     val workerAction = if (jwt == null) WorkerAction.LOGIN else WorkerAction.CREATE_API_KEY
 
     return withContext(Dispatchers.IO) {
+      // TODO inject this
       val cronetEngine =
           CronetEngine.Builder(applicationContext)
               .enableHttp2(true)
@@ -100,19 +102,20 @@ class LoginWorker(private val ctx: Context, params: WorkerParameters) :
         WorkerAction.LOGIN -> """${serverAddress}/login"""
       }
 
+  /**
+   * Call back that will be invoked by Cronet when the JSON response from the server is available.
+   * @return
+   */
   suspend fun onDataReady(response: JsonElement) {
 
+    // Json library seems to wrap these strings in double quotes, so remove them if they exist.
     val jwt = response.jsonObject.get("jwt")?.toString()?.removeSurrounding("\"", "\"")
-    Log.i("Rook", "logging the jwt")
-    Log.i("Rook", jwt ?: "it was null")
-
     val apiKey = response.jsonObject.get("apiKey")?.toString()?.removeSurrounding("\"", "\"")
-
 
     // This was the first successful login, now we need to send another request
     // and generate a permanent API key.
     if (jwt != null) {
-      Log.i(TAG, "Login request successful")
+      Log.i(TAG, "Token was correctly fetched, will attempt to create an API key.")
       workManager.enqueue(
           OneTimeWorkRequestBuilder<LoginWorker>()
               .setInputData(
@@ -127,11 +130,11 @@ class LoginWorker(private val ctx: Context, params: WorkerParameters) :
       )
       return
     } else if (apiKey != null) {
-      Log.i(TAG, "Found apiKey")
       val apiKeySetting: Setting = Setting(key = SettingKey.API_KEY.key, value = apiKey)
       val hostSetting: Setting = Setting(key = SettingKey.HOST.key, value = serverAddress)
       rookDatabase.settings().insert(apiKeySetting)
       rookDatabase.settings().insert(hostSetting)
+      return
     }
 
     Log.e(

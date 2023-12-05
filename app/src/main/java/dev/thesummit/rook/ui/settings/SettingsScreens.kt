@@ -82,8 +82,18 @@ fun SettingsInitialized(
 ) {
 
   Column {
-    Text("""host: ${uiState.host.value}""")
-    Text("""apiKey: ${uiState.apiKey.value}""")
+
+    Column(modifier = Modifier.padding(10.dp)){
+      Text(text=stringResource(R.string.label_settings_hostname), style=MaterialTheme.typography.titleMedium)
+      Spacer(modifier = Modifier.padding(8.dp))
+      Text(text = uiState.host.value, style = MaterialTheme.typography.labelLarge)
+    }
+
+    Column(modifier = Modifier.padding(10.dp)){
+      Text(text=stringResource(R.string.label_settings_apikey), style=MaterialTheme.typography.titleMedium)
+      Spacer(modifier = Modifier.padding(8.dp))
+      Text(text = uiState.apiKey.value, style = MaterialTheme.typography.labelSmall)
+    }
   }
 }
 

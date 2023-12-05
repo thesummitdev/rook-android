@@ -7,4 +7,7 @@
     <string name="label_username">Username</string>
     <string name="label_password">Password</string>
     <string name="label_sign_in_button">Sign in to Rook</string>
+    <string name="label_settings_initialized_section_header"></string>
+    <string name="label_settings_hostname">Rook Server Address</string>
+    <string name="label_settings_apikey">Rook API Key</string>
 </resources>

@@ -90,6 +90,9 @@ class SyncWorker(private val ctx: Context, params: WorkerParameters) :
     }
   }
 
+  /**
+   * Call back that will be invoked by Cronet when the JSON response from the server is available.
+   */
   suspend fun onDataReady(response: JsonElement) {
 
     Log.i(TAG, "Sync Request successful.")
