@@ -3,13 +3,17 @@ package dev.thesummit.rook.ui.home
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import dev.thesummit.rook.ui.navigation.navigateToCreate
 
 @Composable
 fun HomeRoute(
-    homeViewModel: HomeViewModel,
     isExpandedScreen: Boolean,
     openDrawer: () -> Unit,
+    navController: NavHostController,
+    homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
 
   // Generate the uiState.
@@ -19,7 +23,8 @@ fun HomeRoute(
       uiState = uiState,
       isExpandedScreen = isExpandedScreen,
       openDrawer = openDrawer,
-      onRefreshLinks = { homeViewModel.refreshLinks() }
+      onRefreshLinks = homeViewModel::refreshLinks,
+      onFabClick = navController::navigateToCreate,
   )
 }
 
@@ -29,6 +34,7 @@ fun HomeRoute(
     isExpandedScreen: Boolean,
     openDrawer: () -> Unit,
     onRefreshLinks: () -> Unit,
+    onFabClick: () -> Unit,
 ) {
 
   val homeListLazyListState = rememberLazyListState()
@@ -43,6 +49,7 @@ fun HomeRoute(
           openDrawer = openDrawer,
           lazyListState = homeListLazyListState,
           onRefreshLinks = onRefreshLinks,
+          onFabClick = onFabClick,
       )
     }
   }

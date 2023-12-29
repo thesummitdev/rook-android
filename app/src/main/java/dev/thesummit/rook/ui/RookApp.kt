@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import dev.thesummit.rook.data.AppContainer
 import dev.thesummit.rook.ui.components.AppNavRail
 import dev.thesummit.rook.ui.navigation.RookDestinations
 import dev.thesummit.rook.ui.navigation.RookNavGraph
@@ -31,14 +30,14 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RookApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) {
+fun RookApp(widthSizeClass: WindowWidthSizeClass) {
   val navController = rememberNavController()
   val navigationActions = remember(navController) { RookNavigationActions(navController) }
 
   val coroutineScope = rememberCoroutineScope()
 
   val navBackStackEntry by navController.currentBackStackEntryAsState()
-  val currentRoute = navBackStackEntry?.destination?.route ?: RookDestinations.INITIAL_ROUTE
+  val currentRoute = navBackStackEntry?.destination?.route ?: RookDestinations.HOME_ROUTE
 
   val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
   val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
@@ -65,7 +64,6 @@ fun RookApp(appContainer: AppContainer, widthSizeClass: WindowWidthSizeClass) {
           )
         }
         RookNavGraph(
-            appContainer = appContainer,
             isExpandedScreen = isExpandedScreen,
             navController = navController,
             openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } }

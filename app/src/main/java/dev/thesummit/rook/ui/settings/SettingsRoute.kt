@@ -3,6 +3,7 @@ package dev.thesummit.rook.ui.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.hilt.navigation.compose.hiltViewModel
 import android.util.Log
 
 private enum class SettingsScreenType {
@@ -12,9 +13,9 @@ private enum class SettingsScreenType {
 
 @Composable
 fun SettingsRoute(
-    viewModel: SettingsViewModel,
     isExpandedScreen: Boolean,
     openDrawer: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
 
 

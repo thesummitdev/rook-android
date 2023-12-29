@@ -7,12 +7,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.thesummit.rook.data.Result
 import dev.thesummit.rook.data.settings.SettingsRepository
 import dev.thesummit.rook.model.Setting
 import dev.thesummit.rook.model.SettingKey
 import dev.thesummit.rook.utils.ErrorMessage
 import dev.thesummit.rook.workers.LoginWorker
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
@@ -52,25 +55,13 @@ private data class SettingsViewModelState(
           )
 }
 
-class SettingsViewModel(
-    val applicationContext: Context,
+@HiltViewModel
+class SettingsViewModel
+@Inject
+constructor(
+    @ApplicationContext val applicationContext: Context,
     val settingsRepository: SettingsRepository
 ) : ViewModel() {
-
-  companion object {
-    fun provideFactory(
-        applicationContext: Context,
-        settingsRepository: SettingsRepository
-    ): ViewModelProvider.Factory =
-        // Handled by compose compiler
-        @Suppress("JVM_DEFAULT_THROUGH_INHERITANCE")
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SettingsViewModel(applicationContext, settingsRepository) as T
-          }
-        }
-  }
 
   private val workManager = WorkManager.getInstance(applicationContext)
   // Keep internal mutable state.

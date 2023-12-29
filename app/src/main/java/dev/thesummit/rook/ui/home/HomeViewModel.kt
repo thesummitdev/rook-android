@@ -3,21 +3,26 @@ package dev.thesummit.rook.ui.home
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.thesummit.rook.R
 import dev.thesummit.rook.data.Result
 import dev.thesummit.rook.data.links.LinksRepository
 import dev.thesummit.rook.model.LinksFeed
 import dev.thesummit.rook.utils.ErrorMessage
+import dev.thesummit.rook.utils.NetworkStatus
+import dev.thesummit.rook.utils.NetworkStatusTracker
 import dev.thesummit.rook.workers.SyncWorker
 import java.util.UUID
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -73,6 +78,7 @@ private data class HomeViewModelState(
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchInput: String = "",
+    val networkConnected: Boolean = true,
 ) {
 
   /**
@@ -97,12 +103,17 @@ private data class HomeViewModelState(
       }
 }
 
-class HomeViewModel(
-    private val applicationContext: Context,
+@HiltViewModel
+class HomeViewModel
+@Inject
+constructor(
+    @ApplicationContext private val applicationContext: Context,
     private val linksRepository: LinksRepository,
+    private val networkStatusTracker: NetworkStatusTracker,
 ) : ViewModel() {
   private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
   private val workManager = WorkManager.getInstance(applicationContext)
+  private val networkStatus = networkStatusTracker.networkStatus
 
   // UI state exposed to the UI
   val uiState =
@@ -111,14 +122,31 @@ class HomeViewModel(
           .stateIn(viewModelScope, SharingStarted.Eagerly, viewModelState.value.toUiState())
 
   init {
+
+    viewModelScope.launch(Dispatchers.IO) {
+      // Observe the device network state.
+      networkStatus.collect { status ->
+        when (status) {
+          is NetworkStatus.Available -> {
+            viewModelState.update { it.copy(networkConnected = true) }
+          }
+          is NetworkStatus.Unavailable -> {
+            viewModelState.update { it.copy(networkConnected = false) }
+          }
+        }
+      }
+    }
+
     refreshLinks()
-    viewModelScope.launch {
+    viewModelScope.launch(Dispatchers.IO) {
+
+      // Begin collecting links from the database.
       linksRepository.getLinks().collect { result ->
         viewModelState.update {
           when (result) {
             is Result.Success -> it.copy(linksFeed = LinksFeed(result.data), isLoading = false)
             is Result.Error -> {
-              Log.i("Rook", "found result.error")
+              Log.i("Rook", "found result: error")
               val errorMessages =
                   it.errorMessages +
                       ErrorMessage(
@@ -134,33 +162,14 @@ class HomeViewModel(
   }
 
   fun refreshLinks() {
-    Log.i("Rook", "refreshing links")
-
-    viewModelScope.launch(Dispatchers.IO) {
-      // Until we diff the current database, just drop everything and resync.
-      linksRepository.dropAllLinks()
+    if (!viewModelState.value.networkConnected) {
+      return
     }
 
-    viewModelState.update { it.copy(isLoading = true) }
     workManager.enqueue(OneTimeWorkRequest.from(SyncWorker::class.java))
     viewModelScope.launch {
-      delay(800) // TODO: subscribe to workmanager and hide this when the work request is done.
+      delay(1000L) // TODO: subscribe to workmanager and hide this when the work request is done.
       viewModelState.update { it.copy(isLoading = false) }
     }
-  }
-
-  companion object {
-    fun provideFactory(
-        applicationContext: Context,
-        linksRepository: LinksRepository,
-    ): ViewModelProvider.Factory =
-        // Handled by compose compiler
-        @Suppress("JVM_DEFAULT_THROUGH_INHERITANCE")
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return HomeViewModel(applicationContext, linksRepository) as T
-          }
-        }
   }
 }

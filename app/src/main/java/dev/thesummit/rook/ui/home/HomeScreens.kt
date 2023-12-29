@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import dev.thesummit.rook.R
 import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinksFeed
+import dev.thesummit.rook.ui.components.RookFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +90,7 @@ fun HomeLinksFeed(
     openDrawer: () -> Unit,
     onRefreshLinks: () -> Unit,
     lazyListState: LazyListState,
+    onFabClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -98,6 +100,7 @@ fun HomeLinksFeed(
       onRefreshLinks = onRefreshLinks,
       openDrawer = openDrawer,
       modifier = modifier,
+      onFabClick = onFabClick,
   ) { hasLinksUiState, contentModifier ->
     LinkList(
         linksFeed = hasLinksUiState.linksFeed,
@@ -114,6 +117,7 @@ fun HomeScreenWithList(
     showTopAppBar: Boolean,
     onRefreshLinks: () -> Unit,
     modifier: Modifier = Modifier,
+    onFabClick: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     state: LazyListState = rememberLazyListState(),
     openDrawer: () -> Unit,
@@ -132,6 +136,7 @@ fun HomeScreenWithList(
           )
         }
       },
+      floatingActionButton = { RookFloatingActionButton(onClick = { onFabClick() }) },
       modifier = modifier
   ) { innerPadding ->
     val contentModifier =
@@ -161,7 +166,7 @@ fun noLinksContent(uiState: HomeUiState.NoLinks, modifier: Modifier) {
   val scrollState = rememberScrollState()
 
   Box(modifier.fillMaxSize().wrapContentSize(Alignment.Center).verticalScroll(scrollState)) {
-    Text(text = stringResource(uiState.errorMessages.first().messageId))
+    Text(text = stringResource(R.string.load_error))
   }
 }
 
@@ -238,8 +243,8 @@ fun LinkCard(link: Link) {
   val context = LocalContext.current
 
   ListItem(
-      headlineText = { LinkTitle(link) },
-      supportingText = {
+      headlineContent = { LinkTitle(link) },
+      supportingContent = {
         Text(
             text = link.url,
             style = MaterialTheme.typography.labelSmall,

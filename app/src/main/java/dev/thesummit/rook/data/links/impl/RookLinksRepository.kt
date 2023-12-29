@@ -9,12 +9,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import org.chromium.net.CronetEngine
 
 private const val TAG = "Rook"
 
-class RookLinksRepository(private val linkDao: LinkDao, private val cronetEngine: CronetEngine) :
-    LinksRepository {
+class RookLinksRepository(private val linkDao: LinkDao) : LinksRepository {
 
   override suspend fun getLinks(): Flow<Result<List<Link>>> {
 
@@ -32,6 +30,6 @@ class RookLinksRepository(private val linkDao: LinkDao, private val cronetEngine
   }
 
   override suspend fun dropAllLinks() {
-    linkDao.dropAllLinks();
+    linkDao.dropAllLinks()
   }
 }

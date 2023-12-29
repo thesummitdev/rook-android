@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 val NightfoxBackground = Color(0xFF192330) // #192330
 val NightfoxOnBackground = Color(0xFFCDCECF) // #CDCECF
 val NightfoxPrimary = Color(0xFFD671B2) // #D671B2
-val NightfoxOnPrimary = Color(0xFF212E3F) // #AEAFB0
+val NightfoxOnPrimary = Color(0xFFAEAFB0) // #AEAFB0
 val NightfoxSurface = Color(0xFF212E3F) // #212E3F
 val NightfoxOnSurface = NightfoxOnPrimary
 val NightfoxSecondary = Color(0xFFD671B2) // #D671B2

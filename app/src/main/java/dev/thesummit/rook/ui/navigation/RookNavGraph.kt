@@ -1,27 +1,19 @@
 package dev.thesummit.rook.ui.navigation
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import dev.thesummit.rook.data.AppContainer
+import dev.thesummit.rook.ui.create.CreateRoute
 import dev.thesummit.rook.ui.home.HomeRoute
-import dev.thesummit.rook.ui.home.HomeViewModel
 import dev.thesummit.rook.ui.settings.SettingsRoute
-import dev.thesummit.rook.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RookNavGraph(
-    appContainer: AppContainer,
     isExpandedScreen: Boolean,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -34,45 +26,18 @@ fun RookNavGraph(
       startDestination = startDestination,
       modifier = modifier,
   ) {
-    composable(RookDestinations.INITIAL_ROUTE) {
-      Surface {
-        Text(
-            "Hello intial route",
-            modifier = Modifier.padding(vertical = 24.dp, horizontal = 24.dp)
-        )
-      }
-    }
-
     composable(RookDestinations.HOME_ROUTE) {
-      val homeViewModel: HomeViewModel =
-          viewModel(
-              factory =
-                  HomeViewModel.provideFactory(
-                      appContainer.applicationContext,
-                      appContainer.linksRepository,
-                  )
-          )
       HomeRoute(
-          homeViewModel = homeViewModel,
           isExpandedScreen = isExpandedScreen,
-          openDrawer = openDrawer
+          openDrawer = openDrawer,
+          navController = navController,
       )
     }
 
     composable(RookDestinations.SETTINGS_ROUTE) {
-      val settingsViewModel: SettingsViewModel =
-          viewModel(
-              factory =
-                  SettingsViewModel.provideFactory(
-                      appContainer.applicationContext,
-                      appContainer.settingsRepository
-                  )
-          )
-      SettingsRoute(
-          viewModel = settingsViewModel,
-          isExpandedScreen = isExpandedScreen,
-          openDrawer = openDrawer
-      )
+      SettingsRoute(isExpandedScreen = isExpandedScreen, openDrawer = openDrawer)
     }
+
+    composable(RookDestinations.CREATE_ROUTE) { CreateRoute(openDrawer = openDrawer) }
   }
 }

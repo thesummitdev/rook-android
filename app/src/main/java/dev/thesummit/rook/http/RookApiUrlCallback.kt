@@ -27,7 +27,7 @@ class RookApiUrlRequestCallback(val onDataReady: suspend (json: JsonElement) -> 
 
     if (info?.httpStatusCode == 200) {
       val response = Json.parseToJsonElement(bytesReceived.toString())
-      Log.i(TAG, """Response received: ${response}""")
+      Log.d(TAG, """Response received: ${response}""")
 
       runBlocking(Dispatchers.IO) { onDataReady(response) }
     } else {
