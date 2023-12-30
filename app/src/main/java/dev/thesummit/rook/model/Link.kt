@@ -11,16 +11,15 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 @Entity(tableName = "links")
 data class Link(
-    @PrimaryKey(autoGenerate = false) val id: Int,
+    @PrimaryKey(autoGenerate = false) var id: Int,
     val title: String,
     val tags: String,
     val url: String,
     val modified: Long,
-)
+) {}
 
 @Dao
 interface LinkDao {

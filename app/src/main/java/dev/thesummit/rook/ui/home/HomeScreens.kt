@@ -216,7 +216,7 @@ fun LinkList(
     state: LazyListState = rememberLazyListState(),
 ) {
   LazyColumn(modifier = modifier, contentPadding = contentPadding, state = state) {
-    items(linksFeed.allLinks, { link: Link -> link.id }) { link -> LinkCard(link) }
+    items(linksFeed.allLinks, { link: Link -> link.url }) { link -> LinkCard(link) }
   }
 }
 

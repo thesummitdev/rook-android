@@ -41,8 +41,10 @@ class SyncWorker(private val ctx: Context, params: WorkerParameters) :
 
     val cursor = inputData.getString("cursor")
 
-    Log.i(TAG, "Beginning local Rook database sync with server.")
-    if (cursor != null) {
+    if (cursor == null) {
+      Log.i(TAG, "Beginning local Rook database sync with server.")
+      rookDatabase.links().dropAllLinks()
+    } else {
       Log.i(TAG, """Resuming sync with cursor: ${cursor}""")
     }
 

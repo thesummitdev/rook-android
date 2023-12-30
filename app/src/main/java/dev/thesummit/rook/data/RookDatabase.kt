@@ -10,7 +10,7 @@ import dev.thesummit.rook.model.Setting
 import dev.thesummit.rook.model.SettingDao
 import kotlin.synchronized
 
-@Database(entities = [Link::class, Setting::class], version = 1, exportSchema = false)
+@Database(entities = [Link::class, Setting::class], version = 3, exportSchema = false)
 abstract class RookDatabase : RoomDatabase() {
 
   abstract fun links(): LinkDao
