@@ -13,6 +13,8 @@ import dev.thesummit.rook.data.settings.SettingsRepository
 import dev.thesummit.rook.http.RookApiUrlRequestCallback
 import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.SettingKey
+import dev.thesummit.rook.ui.navigation.Navigator
+import dev.thesummit.rook.ui.navigation.RookDestinations
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -20,12 +22,12 @@ import kotlin.collections.dropWhile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import org.chromium.net.CronetEngine
 import org.chromium.net.UploadDataProviders
 import org.chromium.net.UrlRequest
@@ -40,7 +42,8 @@ class CreateViewModel
 constructor(
     private val linksRepository: LinksRepository,
     private val settingsRepository: SettingsRepository,
-    private val cronetEngine: CronetEngine
+    private val cronetEngine: CronetEngine,
+    private val navigator: Navigator,
 ) : ViewModel() {
 
   // Internal state
@@ -161,5 +164,6 @@ constructor(
 
     formState = LinkForm.LinkFormState()
     _uiState.update { it.copy(requestPending = false) }
+    navigator.navigateTo(RookDestinations.HOME_ROUTE)
   }
 }

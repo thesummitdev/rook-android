@@ -22,6 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.thesummit.rook.ui.navigation.LocalNavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import dev.thesummit.rook.R
 import dev.thesummit.rook.ui.navigation.RookDestinations
 
@@ -29,11 +33,12 @@ import dev.thesummit.rook.ui.navigation.RookDestinations
 @Composable
 fun AppDrawer(
     currentRoute: String,
-    navigateToHome: () -> Unit,
-    navigateToSettings: () -> Unit,
+    navigateToHome: (navOptions: NavOptions?) -> Unit,
+    navigateToSettings: (navOptions: NavOptions?) -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+  val navController = LocalNavController.current
 
   ModalDrawerSheet(modifier) {
     RookLogo(
@@ -49,7 +54,8 @@ fun AppDrawer(
         icon = { Icon(Icons.Filled.Home, null) },
         selected = currentRoute == RookDestinations.HOME_ROUTE,
         onClick = {
-          navigateToHome()
+          navController.popBackStack(navController.graph.startDestinationId, inclusive = true)
+          navigateToHome(null)
           closeDrawer()
         },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -59,7 +65,11 @@ fun AppDrawer(
         icon = { Icon(Icons.Filled.Settings, null) },
         selected = currentRoute == RookDestinations.SETTINGS_ROUTE,
         onClick = {
-          navigateToSettings()
+          navigateToSettings(
+              navOptions {
+                popUpTo(navController.graph.startDestinationId)
+              }
+          )
           closeDrawer()
         },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
