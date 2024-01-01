@@ -57,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.thesummit.rook.R
 import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinksFeed
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeLinksFeed(
@@ -277,6 +278,7 @@ fun LinkCard(
 
   LaunchedEffect(show) {
     if (!show) {
+      delay(800L)
       onDelete(link)
     }
   }
