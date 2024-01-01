@@ -29,6 +29,10 @@ class RookLinksRepository(private val linkDao: LinkDao) : LinksRepository {
     linkDao.insert(link)
   }
 
+  override suspend fun deleteLink(link:Link) {
+    linkDao.delete(link)
+  }
+
   override suspend fun dropAllLinks() {
     linkDao.dropAllLinks()
   }

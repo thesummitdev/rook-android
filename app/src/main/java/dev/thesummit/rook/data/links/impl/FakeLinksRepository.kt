@@ -25,6 +25,7 @@ class FakeLinksRepository() : LinksRepository {
   }
 
   override suspend fun addLink(link: Link) {}
+  override suspend fun deleteLink(link:Link) {}
   private var requestCount = 0
 
   private fun shouldRandomlyFail(): Boolean = ++requestCount % 5 == 0

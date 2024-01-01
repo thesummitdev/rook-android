@@ -8,12 +8,14 @@ val NightfoxOnBackground = Color(0xFFCDCECF) // #CDCECF
 val NightfoxPrimary = Color(0xFFD671B2) // #D671B2
 val NightfoxOnPrimary = Color(0xFFAEAFB0) // #AEAFB0
 val NightfoxSurface = Color(0xFF212E3F) // #212E3F
-val NightfoxOnSurface = NightfoxOnPrimary
+val NightfoxOnSurface = Color(0xFFD6D6D7) // #D6D6D7
 val NightfoxSecondary = Color(0xFFD671B2) // #D671B2
-val NightfoxOnSecondary = NightfoxOnPrimary
+val NightfoxOnSecondary = Color(0xFF192330) // #192330
 val NightfoxTertiary = Color(0xFF8DBDFF) // #8dBDFF
-val NightfoxOnTertiary = NightfoxOnPrimary
-val NightfoxSurfaceVariant = Color(0xFF29394F)
+val NightfoxOnTertiary =  Color(0xFF192330) // #192330
+val NightfoxSurfaceVariant = Color(0xFF29394F) // #29394F
+val NightfoxError = Color(0xFFC94F6D)
+val NightfoxOnError = Color(0xFF192330) // #71839B
 
 // Rook Light
 val LightBackground = Color(0xFFEFF8FF)

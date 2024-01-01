@@ -29,6 +29,8 @@ private val DarkColorScheme =
         surface = NightfoxSurface,
         onSurface = NightfoxOnSurface,
         surfaceVariant = NightfoxSurfaceVariant,
+        error = NightfoxError,
+        onError = NightfoxOnError
     )
 
 private val LightColorScheme =
