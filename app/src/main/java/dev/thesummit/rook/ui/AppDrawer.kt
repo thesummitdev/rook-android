@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,19 +23,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import dev.thesummit.rook.ui.navigation.LocalNavController
-import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.navOptions
 import dev.thesummit.rook.R
+import dev.thesummit.rook.ui.navigation.LocalNavController
 import dev.thesummit.rook.ui.navigation.RookDestinations
+import dev.thesummit.rook.ui.navigation.navigateToCreate
+import dev.thesummit.rook.ui.navigation.navigateToHome
+import dev.thesummit.rook.ui.navigation.navigateToSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDrawer(
     currentRoute: String,
-    navigateToHome: (navOptions: NavOptions?) -> Unit,
-    navigateToSettings: (navOptions: NavOptions?) -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -55,7 +56,19 @@ fun AppDrawer(
         selected = currentRoute == RookDestinations.HOME_ROUTE,
         onClick = {
           navController.popBackStack(navController.graph.startDestinationId, inclusive = true)
-          navigateToHome(null)
+          navController.navigateToHome(null)
+          closeDrawer()
+        },
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+    )
+    NavigationDrawerItem(
+        label = { Text("New Bookmark") },
+        icon = { Icon(Icons.Filled.Add, null) },
+        selected = currentRoute == RookDestinations.CREATE_ROUTE,
+        onClick = {
+          navController.navigateToCreate(
+              navOptions { popUpTo(navController.graph.startDestinationId) }
+          )
           closeDrawer()
         },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -65,10 +78,8 @@ fun AppDrawer(
         icon = { Icon(Icons.Filled.Settings, null) },
         selected = currentRoute == RookDestinations.SETTINGS_ROUTE,
         onClick = {
-          navigateToSettings(
-              navOptions {
-                popUpTo(navController.graph.startDestinationId)
-              }
+          navController.navigateToSettings(
+              navOptions { popUpTo(navController.graph.startDestinationId) }
           )
           closeDrawer()
         },

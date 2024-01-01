@@ -1,55 +1,42 @@
 package dev.thesummit.rook.ui.home
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import dev.thesummit.rook.ui.navigation.navigateToCreate
 
 @Composable
 fun HomeRoute(
-    isExpandedScreen: Boolean,
-    openDrawer: () -> Unit,
-    navController: NavHostController,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
 
   // Generate the uiState.
   val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+  val lazyListState = rememberLazyListState()
 
   HomeRoute(
       uiState = uiState,
-      isExpandedScreen = isExpandedScreen,
-      openDrawer = openDrawer,
+      lazyListState = lazyListState,
       onRefreshLinks = homeViewModel::refreshLinks,
-      onFabClick = navController::navigateToCreate,
   )
 }
 
 @Composable
 fun HomeRoute(
     uiState: HomeUiState,
-    isExpandedScreen: Boolean,
-    openDrawer: () -> Unit,
+    lazyListState: LazyListState,
     onRefreshLinks: () -> Unit,
-    onFabClick: () -> Unit,
 ) {
-
-  val homeListLazyListState = rememberLazyListState()
-
   val homeScreenType = getHomeScreenType(uiState)
 
   when (homeScreenType) {
     HomeScreenType.LinksFeed -> {
       HomeLinksFeed(
           uiState = uiState,
-          showTopAppBar = !isExpandedScreen,
-          openDrawer = openDrawer,
-          lazyListState = homeListLazyListState,
+          lazyListState = lazyListState,
           onRefreshLinks = onRefreshLinks,
-          onFabClick = onFabClick,
       )
     }
   }

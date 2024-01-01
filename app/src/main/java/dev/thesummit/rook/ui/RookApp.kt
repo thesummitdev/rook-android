@@ -5,26 +5,35 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import dev.thesummit.rook.ui.components.AppNavRail
+import dev.thesummit.rook.ui.components.RookFloatingActionButton
+import dev.thesummit.rook.ui.components.TopAppBar
+import dev.thesummit.rook.ui.navigation.LocalNavController
 import dev.thesummit.rook.ui.navigation.RookDestinations
 import dev.thesummit.rook.ui.navigation.RookNavGraph
-import dev.thesummit.rook.ui.navigation.LocalNavController
+import dev.thesummit.rook.ui.navigation.navigateToCreate
 import dev.thesummit.rook.ui.navigation.navigateToHome
 import dev.thesummit.rook.ui.navigation.navigateToSettings
 import kotlinx.coroutines.launch
@@ -41,12 +50,13 @@ fun RookApp(widthSizeClass: WindowWidthSizeClass) {
   val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
   val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
 
+  val topAppBarState = rememberTopAppBarState()
+  val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+
   ModalNavigationDrawer(
       drawerContent = {
         AppDrawer(
             currentRoute = currentRoute,
-            navigateToHome = navController::navigateToHome,
-            navigateToSettings = navController::navigateToSettings,
             closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } },
         )
       },
@@ -61,12 +71,30 @@ fun RookApp(widthSizeClass: WindowWidthSizeClass) {
               navigateToHome = navController::navigateToHome,
               navigateToSettings = navController::navigateToSettings,
           )
-        } else {}
-        RookNavGraph(
-            isExpandedScreen = isExpandedScreen,
-            navController = navController,
-            openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } }
-        )
+        }
+        Scaffold(
+            topBar = {
+              if (true) {
+                TopAppBar(
+                    openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
+                    topAppBarState = topAppBarState,
+                )
+              }
+            },
+            floatingActionButton = {
+              RookFloatingActionButton(onClick = navController::navigateToCreate)
+            },
+        ) { innerPadding ->
+          val contentModifier =
+              Modifier.padding(innerPadding)
+                  .nestedScroll(scrollBehavior.nestedScrollConnection)
+                  .fillMaxWidth()
+
+          RookNavGraph(
+              modifier = contentModifier,
+              isExpandedScreen = isExpandedScreen,
+          )
+        }
       }
     }
   }
