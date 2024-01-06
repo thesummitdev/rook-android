@@ -14,15 +14,17 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.thesummit.rook.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +49,12 @@ fun CreatePage(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Row { Text(text = "Add a new link", style = MaterialTheme.typography.titleLarge) }
+    Row {
+      Text(
+          text = stringResource(R.string.create_page_title),
+          style = MaterialTheme.typography.titleLarge
+      )
+    }
 
     TextField(
         modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
@@ -58,7 +65,7 @@ fun CreatePage(
               Text(viewModel.formState.titleErrorMessage)
         },
         onValueChange = { viewModel.onEvent(CreateUiEvent.TitleChanged(it)) },
-        label = { Text("Title") },
+        label = { Text(text = stringResource(R.string.create_page_title_label)) },
     )
 
     TextField(
@@ -70,19 +77,19 @@ fun CreatePage(
               Text(viewModel.formState.urlErrorMessage)
         },
         onValueChange = { viewModel.onEvent(CreateUiEvent.UrlChanged(it)) },
-        label = { Text("Url") },
+        label = { Text(text = stringResource(R.string.create_page_url_label)) },
     )
 
     TextField(
         modifier = Modifier.fillMaxWidth(),
         value = viewModel.formState.tags,
         onValueChange = { viewModel.onEvent(CreateUiEvent.TagsChanged(it)) },
-        label = { Text("Tags") },
+        label = { Text(text = stringResource(R.string.create_page_tags_label)) },
     )
 
     Button(
         onClick = { viewModel.onEvent(CreateUiEvent.Submit) },
-        content = { Text("Create") },
+        content = { Text(text = stringResource(R.string.create_page_create_button_label)) },
         enabled =
             // No validation errors
             viewModel.formState.invalidFields.isEmpty() &&
