@@ -1,10 +1,13 @@
 package dev.thesummit.rook.ui.navigation
 
+import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import dev.thesummit.rook.ui.create.CreateRoute
 import dev.thesummit.rook.ui.home.HomeRoute
 import dev.thesummit.rook.ui.settings.SettingsRoute
@@ -15,6 +18,7 @@ fun RookNavGraph(
     isExpandedScreen: Boolean,
     modifier: Modifier = Modifier,
     startDestination: String = RookDestinations.HOME_ROUTE,
+    route: String? = null,
 ) {
 
   val navController = LocalNavController.current
@@ -28,6 +32,17 @@ fun RookNavGraph(
 
     composable(RookDestinations.SETTINGS_ROUTE) { SettingsRoute() }
 
-    composable(RookDestinations.CREATE_ROUTE) { CreateRoute() }
+    composable(
+        """${RookDestinations.CREATE_ROUTE}?url={url}""",
+        arguments = listOf(navArgument("url") { nullable = true })
+    ) { backStackEntry ->
+      CreateRoute(prefillUrl = backStackEntry.arguments?.getString("url"))
+    }
+  }
+
+  LaunchedEffect(route) {
+    if (route != null) {
+      navController.navigate(route)
+    }
   }
 }

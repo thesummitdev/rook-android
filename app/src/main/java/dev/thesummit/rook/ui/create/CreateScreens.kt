@@ -12,9 +12,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,9 +27,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePage(
+    prefillUrl: String? = null,
     viewModel: CreateViewModel = hiltViewModel(),
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val focusRequester = remember { FocusRequester() }
+
+  // When a prefillUrl is provided, dispatch an event to update the url text field.
+  LaunchedEffect(prefillUrl) {
+    if (!prefillUrl.isNullOrEmpty()) {
+      viewModel.onEvent(CreateUiEvent.UrlChanged(prefillUrl))
+
+      // Set focus to the title field so the user can begin
+      focusRequester.requestFocus()
+    }
+  }
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -34,7 +50,7 @@ fun CreatePage(
     Row { Text(text = "Add a new link", style = MaterialTheme.typography.titleLarge) }
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         value = viewModel.formState.title,
         isError = !viewModel.formState.invalidFields.contains(LinkForm.Fields.TITLE),
         supportingText = {

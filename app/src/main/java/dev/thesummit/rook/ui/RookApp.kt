@@ -40,7 +40,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RookApp(widthSizeClass: WindowWidthSizeClass) {
+fun RookApp(
+    route: String = RookDestinations.HOME_ROUTE,
+    widthSizeClass: WindowWidthSizeClass
+) {
   val navController = LocalNavController.current
   val coroutineScope = rememberCoroutineScope()
 
@@ -91,6 +94,7 @@ fun RookApp(widthSizeClass: WindowWidthSizeClass) {
                   .fillMaxWidth()
 
           RookNavGraph(
+              route = route,
               modifier = contentModifier,
               isExpandedScreen = isExpandedScreen,
           )
