@@ -2,6 +2,7 @@
     <string name="app_name">Rook</string>
     <string name="home_title">Home</string>
     <string name="settings_title">Settings</string>
+    <string name="create_title">Add</string>
     <string name="load_error">Unable to load links</string>
 
     <!-- Settings -->

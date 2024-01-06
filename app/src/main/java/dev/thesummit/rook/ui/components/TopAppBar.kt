@@ -31,6 +31,7 @@ import dev.thesummit.rook.ui.settings.SettingsViewModel
 fun TopAppBar(
     openDrawer: () -> Unit,
     modifier: Modifier = Modifier,
+    isExpandedScreen: Boolean = false,
     topAppBarState: TopAppBarState = rememberTopAppBarState(),
     scrollBehavior: TopAppBarScrollBehavior? =
         TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
@@ -43,12 +44,14 @@ fun TopAppBar(
   TopAppBar(
       title = {},
       navigationIcon = {
-        IconButton(onClick = openDrawer) {
-          Icon(
-              painter = painterResource(R.drawable.ic_rook_logo),
-              contentDescription = "navigate",
-              tint = MaterialTheme.colorScheme.primary,
-          )
+        if (!isExpandedScreen) {
+          IconButton(onClick = openDrawer) {
+            Icon(
+                painter = painterResource(R.drawable.ic_rook_logo),
+                contentDescription = "navigate",
+                tint = MaterialTheme.colorScheme.primary,
+            )
+          }
         }
       },
       actions = {
