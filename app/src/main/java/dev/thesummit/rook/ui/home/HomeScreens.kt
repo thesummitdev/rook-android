@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissState
@@ -39,6 +41,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -231,23 +234,48 @@ fun LinkCard(
 ) {
 
   val context = LocalContext.current
-  var show by remember { mutableStateOf(true) }
+  var deleted by remember { mutableStateOf(false) }
+  var openDialog by remember { mutableStateOf(false) }
+
+  if (openDialog) {
+
+    AlertDialog(
+        onDismissRequest = { openDialog = false },
+        title = { Text(stringResource(R.string.delete_link_dialog_title)) },
+        text = {
+          Column {
+            Text(stringResource(R.string.delete_link_dialog_message))
+            Text(link.title)
+          }
+        },
+        confirmButton = {
+          TextButton(onClick = { deleted = true }) {
+            Text(stringResource(R.string.delete_link_confirm_button_label))
+          }
+        },
+        dismissButton = {
+          TextButton(onClick = { openDialog = false }) {
+            Text(stringResource(R.string.delete_link_cancel_button_label))
+          }
+        }
+    )
+  }
+
   val dismissState =
       rememberDismissState(
           confirmValueChange = {
             if (it == DismissValue.DismissedToStart) {
               onCopy(link)
-              // don't allow value change so we reset the swipe state.
-              false
             } else if (it == DismissValue.DismissedToEnd) {
-              show = false
-              true
-            } else false
+              openDialog = true
+            }
+            // reset the swipe to dismiss state
+            false
           },
           positionalThreshold = { 150.dp.toPx() }
       )
 
-  AnimatedVisibility(show, exit = fadeOut(spring())) {
+  AnimatedVisibility(!deleted, exit = fadeOut(spring())) {
     SwipeToDismiss(
         state = dismissState,
         modifier = Modifier,
@@ -276,8 +304,8 @@ fun LinkCard(
     )
   }
 
-  LaunchedEffect(show) {
-    if (!show) {
+  LaunchedEffect(deleted) {
+    if (deleted) {
       delay(800L)
       onDelete(link)
     }

@@ -21,4 +21,9 @@
     <string name="create_page_tags_label">Tags</string>
     <string name="create_page_create_button_label">Create</string>
 
+    <string name="delete_link_dialog_title">Delete Link</string>
+    <string name="delete_link_dialog_message">Are you sure you want to delete?</string>
+    <string name="delete_link_confirm_button_label">Confirm</string>
+    <string name="delete_link_cancel_button_label">Cancel</string>
+
 </resources>
