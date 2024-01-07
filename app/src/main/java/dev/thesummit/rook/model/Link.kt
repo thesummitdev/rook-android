@@ -28,6 +28,8 @@ interface LinkDao {
   @Update suspend fun update(link: Link)
   @Delete suspend fun delete(link: Link)
 
+  @Query("SELECT tags FROM links where tags LIKE '%' || :prefix || '%'")suspend fun getTags(prefix:String):List<String>
+
   @Query("SELECT * from links ORDER BY id DESC") fun getAllLinks(): Flow<List<Link>>
   @Query("DELETE FROM links") fun dropAllLinks()
 }

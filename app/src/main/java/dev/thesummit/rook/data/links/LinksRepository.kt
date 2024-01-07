@@ -9,6 +9,7 @@ interface LinksRepository {
 
   suspend fun addLink(link:Link)
   suspend fun getLinks(): Flow<Result<List<Link>>>
+  suspend fun getTags(prefix:String): List<String>
   suspend fun deleteLink(link:Link): Unit
   suspend fun dropAllLinks(): Unit
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.thesummit.rook.R
+import dev.thesummit.rook.ui.components.AutocompleteTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +48,7 @@ fun CreatePage(
   }
 
   Column(
+      modifier = Modifier.padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
@@ -59,7 +62,7 @@ fun CreatePage(
     TextField(
         modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         value = viewModel.formState.title,
-        isError = !viewModel.formState.invalidFields.contains(LinkForm.Fields.TITLE),
+        isError = viewModel.formState.invalidFields.contains(LinkForm.Fields.TITLE),
         supportingText = {
           if (viewModel.formState.invalidFields.contains(LinkForm.Fields.TITLE))
               Text(viewModel.formState.titleErrorMessage)
@@ -71,7 +74,7 @@ fun CreatePage(
     TextField(
         modifier = Modifier.fillMaxWidth(),
         value = viewModel.formState.url,
-        isError = !viewModel.formState.invalidFields.contains(LinkForm.Fields.URL),
+        isError = viewModel.formState.invalidFields.contains(LinkForm.Fields.URL),
         supportingText = {
           if (viewModel.formState.invalidFields.contains(LinkForm.Fields.URL))
               Text(viewModel.formState.urlErrorMessage)
@@ -80,8 +83,9 @@ fun CreatePage(
         label = { Text(text = stringResource(R.string.create_page_url_label)) },
     )
 
-    TextField(
+    AutocompleteTextField(
         modifier = Modifier.fillMaxWidth(),
+        predictions = viewModel.tagPredictions,
         value = viewModel.formState.tags,
         onValueChange = { viewModel.onEvent(CreateUiEvent.TagsChanged(it)) },
         label = { Text(text = stringResource(R.string.create_page_tags_label)) },

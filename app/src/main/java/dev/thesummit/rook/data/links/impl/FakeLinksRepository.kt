@@ -31,4 +31,7 @@ class FakeLinksRepository() : LinksRepository {
   private fun shouldRandomlyFail(): Boolean = ++requestCount % 5 == 0
 
   override suspend fun dropAllLinks() {}
+  override suspend fun getTags(prefix:String):List<String> {
+    return listOf()
+  }
 }

@@ -51,6 +51,7 @@ constructor(
 
   val uiState = _uiState.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
   var formState by mutableStateOf(LinkForm.LinkFormState())
+  var tagPredictions by mutableStateOf(listOf<String>())
 
   /**
    * Attempts to push a new link to the Rook server, and if successful, save the response back in
@@ -78,7 +79,7 @@ constructor(
             {
               "title": "${formState.title}",
               "url":  "${formState.url}",
-              "tags": "${formState.tags}"
+              "tags": "${formState.tags.text}"
             }
           """
 
@@ -146,7 +147,10 @@ constructor(
         }
       }
       is CreateUiEvent.TagsChanged -> {
-        formState = formState.copy(tags = event.tags)
+        formState = formState.copy(tags = event.value)
+        viewModelScope.launch(Dispatchers.IO) {
+          tagPredictions = linksRepository.getTags(event.value.text.split(" ").last())
+        }
       }
       is CreateUiEvent.Submit -> {
         createLink()
