@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +21,8 @@ import dev.thesummit.rook.http.RookApiUrlRequestCallback
 import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinksFeed
 import dev.thesummit.rook.model.SettingKey
+import dev.thesummit.rook.ui.Events
+import dev.thesummit.rook.ui.UiEvent
 import dev.thesummit.rook.utils.ErrorMessage
 import dev.thesummit.rook.utils.NetworkStatus
 import dev.thesummit.rook.utils.NetworkStatusTracker
@@ -32,8 +36,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
@@ -43,7 +51,6 @@ import org.chromium.net.UrlRequest
 sealed interface HomeUiState {
   val isLoading: Boolean
   val errorMessages: List<ErrorMessage>
-  val searchInput: String
 
   /**
    * There are no links to render
@@ -55,7 +62,6 @@ sealed interface HomeUiState {
   data class NoLinks(
       override val isLoading: Boolean,
       override val errorMessages: List<ErrorMessage>,
-      override val searchInput: String,
   ) : HomeUiState
 
   /**
@@ -69,10 +75,10 @@ sealed interface HomeUiState {
    */
   data class HasLinks(
       val linksFeed: LinksFeed,
-      // val selectedLink: Link,
+      val showSearchBar: Boolean,
+      val searchInput: String,
       override val isLoading: Boolean,
       override val errorMessages: List<ErrorMessage>,
-      override val searchInput: String,
   ) : HomeUiState
 }
 
@@ -86,9 +92,9 @@ sealed interface HomeUiState {
  */
 private data class HomeViewModelState(
     val linksFeed: LinksFeed? = null,
-    // val selectedLinkId: Int? = null,
     val isLoading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
+    val showSearchBar: Boolean = false,
     val searchInput: String = "",
     val networkConnected: Boolean = true,
 ) {
@@ -103,14 +109,14 @@ private data class HomeViewModelState(
         HomeUiState.NoLinks(
             isLoading = isLoading,
             errorMessages = errorMessages,
-            searchInput = searchInput
         )
       } else {
         HomeUiState.HasLinks(
             linksFeed = linksFeed,
             isLoading = isLoading,
             errorMessages = errorMessages,
-            searchInput = searchInput
+            showSearchBar = showSearchBar,
+            searchInput = searchInput,
         )
       }
 }
@@ -120,12 +126,18 @@ class HomeViewModel
 @Inject
 constructor(
     @ApplicationContext private val applicationContext: Context,
+    private val events: Events,
     private val linksRepository: LinksRepository,
     private val settingsRespository: SettingsRepository,
     private val networkStatusTracker: NetworkStatusTracker,
     private val cronetEngine: CronetEngine,
 ) : ViewModel() {
   private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
+
+  @OptIn(kotlinx.coroutines.FlowPreview::class)
+  private val searchInput =
+      viewModelState.map { it.searchInput }.debounce(1000).distinctUntilChanged()
+
   private val workManager = WorkManager.getInstance(applicationContext)
   private val networkStatus = networkStatusTracker.networkStatus
 
@@ -136,7 +148,6 @@ constructor(
           .stateIn(viewModelScope, SharingStarted.Eagerly, viewModelState.value.toUiState())
 
   init {
-
     viewModelScope.launch(Dispatchers.IO) {
       // Observe the device network state.
       networkStatus.collect { status ->
@@ -151,14 +162,31 @@ constructor(
       }
     }
 
+    viewModelScope.launch(Dispatchers.IO) {
+      events.uiEvents.collect { event ->
+        Log.i("Rook", "received event")
+        Log.i("Rook", """${event}""")
+        when (event) {
+          is UiEvent.ToggleSearch -> {
+            viewModelState.update { it.copy(showSearchBar = !it.showSearchBar, searchInput = "") }
+          }
+        }
+      }
+    }
+
     refreshLinks()
     viewModelScope.launch(Dispatchers.IO) {
-
-      // Begin collecting links from the database.
-      linksRepository.getLinks().collect { result ->
+      @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+      searchInput.map { searchTerm ->
+        if (searchTerm.isNotEmpty()) {
+          linksRepository.searchLinks(searchTerm)
+        } else {
+          linksRepository.getLinks()
+        }
+      }.flatMapLatest{it}.collect { result ->
         viewModelState.update {
           when (result) {
-            is Result.Success -> it.copy(linksFeed = LinksFeed(result.data), isLoading = false)
+            is Result.Success -> it.copy(linksFeed = LinksFeed(result.data))
             is Result.Error -> {
               Log.i("Rook", "found result: error")
               val errorMessages =
@@ -167,12 +195,13 @@ constructor(
                           id = UUID.randomUUID().mostSignificantBits,
                           messageId = R.string.load_error
                       )
-              it.copy(linksFeed = null, errorMessages = errorMessages, isLoading = false)
+              it.copy(linksFeed = null, errorMessages = errorMessages)
             }
           }
         }
       }
     }
+
   }
 
   fun copyToClipboard(link: Link) {
@@ -231,5 +260,13 @@ constructor(
       delay(1000L) // TODO: subscribe to workmanager and hide this when the work request is done.
       viewModelState.update { it.copy(isLoading = false) }
     }
+  }
+
+  fun onSearchInput(value: String) {
+    viewModelState.update { it.copy(searchInput = value) }
+  }
+
+  fun clearSearchInput(){
+    viewModelState.update { it.copy(searchInput = "") }
   }
 }

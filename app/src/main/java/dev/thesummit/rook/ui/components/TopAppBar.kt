@@ -15,6 +15,7 @@ import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,11 +26,13 @@ import dev.thesummit.rook.ui.navigation.LocalNavController
 import dev.thesummit.rook.ui.navigation.RookDestinations
 import dev.thesummit.rook.ui.settings.SettingsUiState
 import dev.thesummit.rook.ui.settings.SettingsViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(
     openDrawer: () -> Unit,
+    toggleSearch: () -> Unit,
     modifier: Modifier = Modifier,
     isExpandedScreen: Boolean = false,
     topAppBarState: TopAppBarState = rememberTopAppBarState(),
@@ -57,9 +60,9 @@ fun TopAppBar(
       actions = {
         if (currentRoute == RookDestinations.HOME_ROUTE) {
           IconButton(onClick = { /* TODO: Open filters */}) {
-            Icon(imageVector = Icons.Filled.Label, contentDescription = "search")
+            Icon(imageVector = Icons.Filled.Label, contentDescription = "tags")
           }
-          IconButton(onClick = { /* TODO: Open search */}) {
+          IconButton(onClick = toggleSearch) {
             Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
           }
         }

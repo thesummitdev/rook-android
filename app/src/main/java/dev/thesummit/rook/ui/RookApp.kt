@@ -40,7 +40,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RookApp(route: String = RookDestinations.HOME_ROUTE, widthSizeClass: WindowWidthSizeClass) {
+fun RookApp(
+    route: String = RookDestinations.HOME_ROUTE,
+    widthSizeClass: WindowWidthSizeClass,
+    toggleSearch: () -> Unit
+) {
   val navController = LocalNavController.current
   val coroutineScope = rememberCoroutineScope()
 
@@ -80,6 +84,7 @@ fun RookApp(route: String = RookDestinations.HOME_ROUTE, widthSizeClass: WindowW
                     isExpandedScreen = isExpandedScreen,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
                     topAppBarState = topAppBarState,
+                    toggleSearch = toggleSearch,
                 )
               }
             },

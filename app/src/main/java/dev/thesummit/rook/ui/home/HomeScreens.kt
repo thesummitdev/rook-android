@@ -3,8 +3,10 @@ package dev.thesummit.rook.ui.home
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,8 +27,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -37,11 +42,13 @@ import androidx.compose.material3.DismissValue
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,12 +58,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.thesummit.rook.R
 import dev.thesummit.rook.model.Link
 import dev.thesummit.rook.model.LinksFeed
@@ -64,26 +74,50 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun HomeLinksFeed(
-    uiState: HomeUiState,
     lazyListState: LazyListState,
-    onRefreshLinks: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
   val viewModel: HomeViewModel = hiltViewModel()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val focusRequester = remember { FocusRequester() }
 
   HomeScreenWithList(
       uiState = uiState,
-      onRefreshLinks = onRefreshLinks,
+      onRefreshLinks = viewModel::refreshLinks,
       modifier = modifier,
   ) { hasLinksUiState, contentModifier ->
-    LinkList(
-        linksFeed = hasLinksUiState.linksFeed,
-        modifier = contentModifier,
-        state = lazyListState,
-        onCopy = viewModel::copyToClipboard,
-        onDelete = viewModel::deleteLink,
-    )
+    LaunchedEffect(hasLinksUiState.showSearchBar) {
+      if (hasLinksUiState.showSearchBar) {
+        focusRequester.requestFocus()
+      }
+    }
+
+    Column(modifier = Modifier.animateContentSize()) {
+      if (hasLinksUiState.showSearchBar) {
+        TextField(
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            value = hasLinksUiState.searchInput,
+            onValueChange = viewModel::onSearchInput,
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "") },
+            trailingIcon = {
+              if (hasLinksUiState.searchInput.isNotEmpty()) {
+                IconButton(onClick = viewModel::clearSearchInput) {
+                  Icon(Icons.Filled.Clear, contentDescription = "")
+                }
+              }
+            },
+        )
+      }
+      LinkList(
+          uiState = hasLinksUiState,
+          linksFeed = hasLinksUiState.linksFeed,
+          modifier = contentModifier,
+          state = lazyListState,
+          onCopy = viewModel::copyToClipboard,
+          onDelete = viewModel::deleteLink,
+      )
+    }
   }
 }
 
@@ -158,8 +192,10 @@ private fun FullScreenLoading() {
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LinkList(
+    uiState: HomeUiState.HasLinks,
     linksFeed: LinksFeed,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -169,7 +205,12 @@ fun LinkList(
 ) {
   LazyColumn(modifier = modifier, contentPadding = contentPadding, state = state) {
     items(linksFeed.allLinks, { link: Link -> link.url }) { link ->
-      LinkCard(link, onDelete, onCopy)
+      LinkCard(
+          modifier = Modifier.animateItemPlacement(),
+          link = link,
+          onDelete = onDelete,
+          onCopy = onCopy
+      )
     }
   }
 }
@@ -231,6 +272,7 @@ fun LinkCard(
     link: Link,
     onDelete: suspend (Link) -> Unit,
     onCopy: (Link) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
 
   val context = LocalContext.current

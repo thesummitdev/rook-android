@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.thesummit.rook.utils.NetworkStatus
 import dev.thesummit.rook.utils.NetworkStatusTracker
+import dev.thesummit.rook.ui.Events
 import kotlin.lazy
 import kotlinx.coroutines.flow.Flow
 import org.chromium.net.CronetEngine

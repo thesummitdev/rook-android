@@ -27,6 +27,16 @@ class RookLinksRepository(private val linkDao: LinkDao) : LinksRepository {
     }
   }
 
+  override suspend fun searchLinks(search: String): Flow<Result<List<Link>>> {
+    return withContext(Dispatchers.IO) {
+      try {
+        linkDao.search(search).map { links -> Result.Success(links) }
+      } catch (exception: Exception) {
+        flow { Result.Error(exception) }
+      }
+    }
+  }
+
   override suspend fun addLink(link: Link) {
     linkDao.insert(link)
   }
